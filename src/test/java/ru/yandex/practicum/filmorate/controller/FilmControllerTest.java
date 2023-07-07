@@ -11,18 +11,18 @@ import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
-public class FilmControllerTest {
+class FilmControllerTest {
 
-    FilmStorage filmStorage;
-    FilmController controller;
-    FilmService filmService;
-    Film testFilm;
+    private FilmStorage filmStorage;
+    private FilmController controller;
+    private FilmService filmService;
+    private Film testFilm;
 
     @BeforeEach
     protected void init() {
         filmStorage = new InMemoryFilmStorage();
         filmService = new FilmService(filmStorage);
-        controller = new FilmController(filmStorage, filmService);
+        controller = new FilmController(filmService);
         testFilm = Film.builder()
                 .name("Тестовый фильм")
                 .description("Тестовое описание тестового фильма")
@@ -34,7 +34,7 @@ public class FilmControllerTest {
     @Test
     void createNewCorrectFilm_isOkTest() {
         controller.create(testFilm);
-        Assertions.assertEquals(testFilm, filmStorage.getFilmById(1));
+        Assertions.assertEquals(testFilm, filmService.getFilmById(1));
     }
 
     @Test

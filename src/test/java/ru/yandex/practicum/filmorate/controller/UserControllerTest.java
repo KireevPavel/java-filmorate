@@ -13,16 +13,16 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
-    UserController controller;
-    UserStorage userStorage;
-    UserService userService;
-    User testUser;
+    private UserController controller;
+    private UserStorage userStorage;
+    private UserService userService;
+    private User testUser;
 
     @BeforeEach
     protected void init() {
         userStorage = new InMemoryUserStorage();
         userService = new UserService(userStorage);
-        controller = new UserController(userStorage, userService);
+        controller = new UserController(userService);
 
         testUser = User.builder()
                 .name("Name")
