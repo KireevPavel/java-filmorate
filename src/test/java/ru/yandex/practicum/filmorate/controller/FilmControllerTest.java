@@ -47,7 +47,6 @@ class FilmControllerTest {
         }
     }
 
-
     @Test
     void createFilm_IncorrectDescription_badRequestTest() {
         testFilm.setDescription("Размер описания значительно превышает двести символов, а может и не превышает " +

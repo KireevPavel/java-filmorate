@@ -15,6 +15,11 @@ import java.util.List;
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Integer, User> users = new HashMap<>();
+    private int idForUser = 0;
+
+    private int getIdForUser() {
+        return ++idForUser;
+    }
 
     @Override
     public List<User> getAll() {
@@ -24,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User create(User user) {
         user.setFriends(new HashSet<>());
-        user.setId(users.size() + 1);
+        user.setId(getIdForUser());
         users.put(user.getId(), user);
         log.info("Поступил запрос на добавление пользователя. Пользователь добавлен.");
         return user;

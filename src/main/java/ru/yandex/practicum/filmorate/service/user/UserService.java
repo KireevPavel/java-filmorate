@@ -7,8 +7,8 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,12 +45,16 @@ public class UserService {
     }
 
     public User addFriend(int userId, int friendId) {
+        User user = userStorage.getById(userId);
+        User friend = userStorage.getById(friendId);
+        userValidation(user);
+        userValidation(friend);
         userStorage.getById(userId).getFriends().add(friendId);
         userStorage.getById(friendId).getFriends().add(userId);
         return userStorage.getById(userId);
     }
 
-    public User deleteFriend(Integer userId, Integer friendId) {
+    public User deleteFriend(int userId, int friendId) {
         getUserById(userId).getFriends().remove(friendId);
         getUserById(friendId).getFriends().remove(userId);
         return getUserById(userId);
@@ -62,16 +66,14 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getMutualFriends(User user1, User user2) {
-        userValidation(user1);
-        userValidation(user2);
-        List<User> users = getAllUsers();
-        Set<Integer> user1Friends = user1.getFriends();
-        Set<Integer> user2Friends = user2.getFriends();
-        return user1Friends
-                .stream()
-                .filter(user2Friends::contains)
-                .map(users::get)
-                .collect(Collectors.toList());
+    public List<User> getMutualFriends(Integer userId, Integer friendId) {
+            List<User> mutualFriends = new ArrayList<>();
+            for (Integer id :getUserById(userId).getFriends()) {
+                if (getUserById(friendId).getFriends().contains(id)) {
+                    mutualFriends.add(getUserById(id));
+                }
+            }
+            return mutualFriends;
     }
 }
+
