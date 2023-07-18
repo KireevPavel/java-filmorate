@@ -14,24 +14,25 @@ import java.util.List;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final HashMap<Long, Film> films = new HashMap<>();
+    private long idForFilm = 0;
 
     @Override
-    public Film create(Film film) {
+    public List<Film> findAllFilms() {
+        return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Film addFilm(Film film) {
         film.setLikes(new HashSet<>());
-        film.setId(films.size() + 1);
+        film.setId(getIdForFilm());
         films.put(film.getId(), film);
         log.info("Поступил запрос на добавление фильма. Фильм добавлен");
         return film;
     }
 
     @Override
-    public List<Film> getAll() {
-        return new ArrayList<>(films.values());
-    }
-
-    @Override
-    public Film update(Film film) {
+    public Film updateFilm(Film film) {
         if (films.get(film.getId()) != null) {
             film.setLikes(new HashSet<>());
             films.put(film.getId(), film);
@@ -44,9 +45,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getById(int id) {
+    public Film getFilmById(long id) {
         if (films.containsKey(id)) {
             return films.get(id);
         } else throw new NotFoundException("Film not found.");
+    }
+
+    private long getIdForFilm() {
+        return ++idForFilm;
     }
 }

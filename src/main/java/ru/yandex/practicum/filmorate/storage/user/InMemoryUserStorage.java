@@ -14,20 +14,20 @@ import java.util.List;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    private final HashMap<Integer, User> users = new HashMap<>();
-    private int idForUser = 0;
+    private final HashMap<Long, User> users = new HashMap<>();
+    private long idForUser = 0;
 
-    private int getIdForUser() {
+    private long getIdForUser() {
         return ++idForUser;
     }
 
     @Override
-    public List<User> getAll() {
+    public List<User> findAllUsers() {
         return new ArrayList<>(users.values());
     }
 
     @Override
-    public User create(User user) {
+    public User addUser(User user) {
         user.setFriends(new HashSet<>());
         user.setId(getIdForUser());
         users.put(user.getId(), user);
@@ -36,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
+    public User updateUser(User user) {
         if (users.get(user.getId()) != null) {
             user.setFriends(new HashSet<>());
             users.put(user.getId(), user);
@@ -49,7 +49,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(Integer id) {
+    public User getUserById(long id) {
         if (users.containsKey(id)) {
             return users.get(id);
         } else throw new NotFoundException("User not found.");

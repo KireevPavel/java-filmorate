@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
-class FilmControllerTest {
+public class FilmControllerTest {
 
     private FilmStorage filmStorage;
     private FilmController controller;
@@ -21,7 +22,7 @@ class FilmControllerTest {
     @BeforeEach
     protected void init() {
         filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage);
+        filmService = new InMemoryFilmService(filmStorage);
         controller = new FilmController(filmService);
         testFilm = Film.builder()
                 .name("Тестовый фильм")
@@ -34,7 +35,7 @@ class FilmControllerTest {
     @Test
     void createNewCorrectFilm_isOkTest() {
         controller.create(testFilm);
-        Assertions.assertEquals(testFilm, filmService.getFilmById(1));
+        Assertions.assertEquals(testFilm, filmStorage.getFilmById(1));
     }
 
     @Test
@@ -46,6 +47,7 @@ class FilmControllerTest {
             Assertions.assertEquals("Некорректно указано название фильма.", e.getMessage());
         }
     }
+
 
     @Test
     void createFilm_IncorrectDescription_badRequestTest() {

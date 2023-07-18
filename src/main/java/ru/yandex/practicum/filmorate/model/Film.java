@@ -12,7 +12,7 @@ import java.util.Set;
 @Builder
 public class Film {
 
-    private int id;
+    private long id;
     @NotBlank
     @NonNull
     private String name;
@@ -22,5 +22,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private Set<Integer> likes;
+    private Set<Long> likes;
 }
