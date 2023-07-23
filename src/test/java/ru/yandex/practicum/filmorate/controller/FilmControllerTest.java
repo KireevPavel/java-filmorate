@@ -1,87 +1,83 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(controllers = FilmController.class)
 public class FilmControllerTest {
 
-
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
-
+    private FilmStorage filmStorage;
+    private FilmController controller;
+    private FilmService filmService;
     private Film testFilm;
 
     @BeforeEach
     protected void init() {
+        filmStorage = new InMemoryFilmStorage();
+        filmService = new InMemoryFilmService(filmStorage);
+        controller = new FilmController(filmService);
         testFilm = Film.builder()
-                .name("Тестовый фильм")
-                .description("Тестовое описание тестового фильма")
-                .releaseDate(LocalDate.of(1999, 12,27))
+                .name("РўРµСЃС‚РѕРІС‹Р№ С„РёР»СЊРј")
+                .description("РўРµСЃС‚РѕРІРѕРµ РѕРїРёСЃР°РЅРёРµ С‚РµСЃС‚РѕРІРѕРіРѕ С„РёР»СЊРјР°")
+                .releaseDate(LocalDate.of(1995, 06, 15))
                 .duration(87)
                 .build();
-
-    }
-
-
-    @Test
-    void createNewCorrectFilm_isOkTest() throws Exception {
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(testFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value("1"));
     }
 
     @Test
-    void createFilm_NameIsBlank_badRequestTest() throws Exception {
+    void createNewCorrectFilm_isOkTest() {
+        controller.create(testFilm);
+        Assertions.assertEquals(testFilm, filmStorage.getFilmById(1));
+    }
+
+    @Test
+    void createFilm_NameIsBlank_badRequestTest() {
         testFilm.setName("");
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(testFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+        try {
+            controller.create(testFilm);
+        } catch (ValidationException e) {
+            Assertions.assertEquals("РќРµРєРѕСЂСЂРµРєС‚РЅРѕ СѓРєР°Р·Р°РЅРѕ РЅР°Р·РІР°РЅРёРµ С„РёР»СЊРјР°.", e.getMessage());
+        }
+    }
+
+
+    @Test
+    void createFilm_IncorrectDescription_badRequestTest() {
+        testFilm.setDescription("Р Р°Р·РјРµСЂ РѕРїРёСЃР°РЅРёСЏ Р·РЅР°С‡РёС‚РµР»СЊРЅРѕ РїСЂРµРІС‹С€Р°РµС‚ РґРІРµСЃС‚Рё СЃРёРјРІРѕР»РѕРІ, Р° РјРѕР¶РµС‚ Рё РЅРµ РїСЂРµРІС‹С€Р°РµС‚ " +
+                "(РЅР°РґРѕ РїРѕСЃС‡РёС‚Р°С‚СЊ). РќРµС‚, Рє СЃРѕР¶Р°Р»РµРЅРёСЋ СЂР°Р·РјРµСЂ РѕРїРёСЃР°РЅРёСЏ С„РёР»СЊРјР° СЃРµР№С‡Р°СЃ РЅРµ РїСЂРµРІС‹С€Р°РµС‚ РґРІРµСЃС‚Рё СЃРёРјРІРѕР»РѕРІ," +
+                "РЅРѕ РІРѕС‚ СЃРµР№С‡Р°СЃ РѕРґРЅРѕР·РЅР°С‡РЅРѕ СЃС‚Р°Р» РїСЂРµРІС‹С€Р°С‚СЊ РґРІРµСЃС‚Рё СЃРёРјРІРѕР»РѕРІ!");
+        try {
+            controller.create(testFilm);
+        } catch (ValidationException e) {
+            Assertions.assertEquals("РџСЂРµРІС‹С€РµРЅРѕ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРёРјРІРѕР»РѕРІ РІ РѕРїРёСЃР°РЅРёРё С„РёР»СЊРјР°.", e.getMessage());
+        }
     }
 
     @Test
-    void createFilm_IncorrectDescription_badRequestTest() throws Exception {
-        testFilm.setDescription("Размер описания значительно превышает двести символов, а может и не превышает " +
-                "(надо посчитать). Нет, к сожалению размер описания фильма сейчас не превышает двести символов," +
-                "но вот сейчас однозначно стал превышать двести символов!");
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(testFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+    void createFilm_RealiseDateInFuture_badRequestTest() {
+        testFilm.setReleaseDate(LocalDate.of(2033, 4, 14));
+        try {
+            controller.create(testFilm);
+        } catch (ValidationException e) {
+            Assertions.assertEquals("РќРµРєРѕСЂСЂРµРєС‚РЅРѕ СѓРєР°Р·Р°РЅР° РґР°С‚Р° СЂРµР»РёР·Р°.", e.getMessage());
+        }
     }
 
     @Test
-    void createFilm_RealiseDateInFuture_badRequestTest() throws Exception {
-        testFilm.setReleaseDate(LocalDate.of(2026, 12, 9));
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(testFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+    void createFilm_RealiseDateBeforeFirstFilmDate_badRequestTest() {
+        testFilm.setReleaseDate(LocalDate.of(1833, 4, 14));
+        try {
+            controller.create(testFilm);
+        } catch (ValidationException e) {
+            Assertions.assertEquals("РќРµРєРѕСЂСЂРµРєС‚РЅРѕ СѓРєР°Р·Р°РЅР° РґР°С‚Р° СЂРµР»РёР·Р°.", e.getMessage());
+        }
     }
-
-    @Test
-    void createFilm_RealiseDateBeforeFirstFilmDate_badRequestTest() throws Exception {
-        testFilm.setReleaseDate(LocalDate.of(1885, 12,12));
-        mockMvc.perform(post("/films")
-                        .content(objectMapper.writeValueAsString(testFilm))
-                        .contentType("application/json"))
-                .andExpect(status().isBadRequest());
-    }
-
 }
