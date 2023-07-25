@@ -1,0 +1,28 @@
+package ru.yandex.practicum.filmorate.service.film;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+
+import java.util.List;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class MpaServiceImpl implements MpaService {
+
+    private final MpaStorage mpaDbStorage;
+
+    @Override
+    public List<Mpa> findAll() {
+        return mpaDbStorage.findAll();
+    }
+
+    @Override
+    public Mpa getMpaRating(int ratingMpaId) {
+        return mpaDbStorage.getMpa(ratingMpaId);
+    }
+
+}

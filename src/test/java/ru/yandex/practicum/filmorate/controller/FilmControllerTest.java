@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
-import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmServiceImpl;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
@@ -22,7 +22,7 @@ public class FilmControllerTest {
     @BeforeEach
     protected void init() {
         filmStorage = new InMemoryFilmStorage();
-        filmService = new InMemoryFilmService(filmStorage);
+        filmService = new FilmServiceImpl(filmStorage);
         controller = new FilmController(filmService);
         testFilm = Film.builder()
                 .name("Тестовый фильм")
@@ -35,7 +35,7 @@ public class FilmControllerTest {
     @Test
     void createNewCorrectFilm_isOkTest() {
         controller.create(testFilm);
-        Assertions.assertEquals(testFilm, filmStorage.getFilmById(1));
+        Assertions.assertEquals(testFilm, filmStorage.getFilmById(1L));
     }
 
     @Test

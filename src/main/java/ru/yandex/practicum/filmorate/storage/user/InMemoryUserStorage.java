@@ -9,17 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Long, User> users = new HashMap<>();
-    private long idForUser = 0;
-
-    private long getIdForUser() {
-        return ++idForUser;
-    }
+    private int idForUser = 0;
 
     @Override
     public List<User> findAllUsers() {
@@ -53,5 +50,41 @@ public class InMemoryUserStorage implements UserStorage {
         if (users.containsKey(id)) {
             return users.get(id);
         } else throw new NotFoundException("User not found.");
+    }
+
+    @Override
+    public List<User> getFriendsByUserId(long id) {
+        return findAllUsers().stream()
+                .filter(user -> user.getFriends().contains(id))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getMutualFriends(long userId, long friendId) {
+        List<User> mutualFriends = new ArrayList<>();
+        for (long id : getUserById(userId).getFriends()) {
+            if (getUserById(friendId).getFriends().contains(id)) {
+                mutualFriends.add(getUserById(id));
+            }
+        }
+        return mutualFriends;
+    }
+
+    private int getIdForUser() {
+        return ++idForUser;
+    }
+
+    @Override
+    public User addFriend(long userId, long friendId) {
+        getUserById(userId).getFriends().add(friendId);
+        getUserById(friendId).getFriends().add(userId);
+        return getUserById(userId);
+    }
+
+    @Override
+    public User deleteFriend(long userId, long friendId) {
+        getUserById(userId).getFriends().remove(friendId);
+        getUserById(friendId).getFriends().remove(userId);
+        return getUserById(userId);
     }
 }

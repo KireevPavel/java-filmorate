@@ -18,15 +18,15 @@ public class FilmController {
     private final FilmService filmService;
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
+    public void create(@Valid @RequestBody Film film) {
         log.info("Поступил запрос на добавление фильма.");
-        return filmService.addFilm(film);
+        filmService.addFilm(film);
     }
 
     @PutMapping
-    public Film changeFilm(@Valid @RequestBody Film film) {
+    public void changeFilm(@Valid @RequestBody Film film) {
         log.info("Поступил запрос на изменения фильма.");
-        return filmService.updateFilm(film);
+        filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{filmId}")
@@ -50,7 +50,7 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getBestFilms(@RequestParam(defaultValue = "10") long count) {
         log.info("Поступил запрос на получение списка популярных фильмов.");
-        return filmService.getTopFilms(count);
+        return filmService.getRating(count);
     }
 
     @DeleteMapping("/{id}/like/{filmId}")
